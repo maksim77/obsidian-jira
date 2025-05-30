@@ -1,0 +1,17 @@
+.jira-statusbar-btn {
+  padding: 2px 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  color: var(--text-normal);
+  font-size: 13px;
+  margin: 2px 0;
+  user-select: none;
+}
+
+.jira-statusbar-btn:hover {
+  background: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+}
