@@ -15,3 +15,21 @@
   background: var(--background-modifier-hover);
   border-color: var(--interactive-accent);
 }
+
+.jira-password-toggle {
+  margin-left: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  vertical-align: middle;
+  padding: 0;
+}
+
+.jira-issue-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 8px;
+  vertical-align: middle;
+  padding: 0;
+}
