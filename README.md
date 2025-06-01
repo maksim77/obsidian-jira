@@ -20,9 +20,6 @@ A plugin for [Obsidian](https://obsidian.md/) that enables you to create Markdow
 2. **Via Community Plugins**
    - (Not yet available in the community plugins list.)
 
-2. **Via Community Plugins**
-   - (Not yet available in the community plugins list.)
-
 ## Usage
 
 1. **Configure Settings**
