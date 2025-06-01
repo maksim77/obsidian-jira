@@ -52,7 +52,7 @@ You can explore the available data fields by performing a `curl` request to your
 curl -u your-username:password https://jira.example.com/rest/api/2/issue/PROJ-123
 ```
 
-The template uses [Nunjucks](https://mozilla.github.io/nunjucks/) syntax. Example:
+The template uses [Nunjucks](https://mozilla.github.io/nunjucks/) syntax.
 
 ### Example template
 ```nunjucks
