@@ -14,8 +14,11 @@ A plugin for [Obsidian](https://obsidian.md/) that enables you to create Markdow
 ## Installation
 
 1. **Manual Installation**
-   - Download the plugin files (`main.ts`, `settings.ts`, `styles.css`) and build them using your preferred TypeScript build process.
-   - Place the compiled files in your Obsidian vault's `.obsidian/plugins/your-plugin-folder/` directory.
+   - Download the latest release of the plugin from the [GitHub Releases](https://github.com/maksim77/obsidian-jira/releases) page.
+   - Place the downloaded file into a subfolder within your Obsidian vault’s .obsidian/plugins/ directory.
+
+2. **Via Community Plugins**
+   - (Not yet available in the community plugins list.)
 
 2. **Via Community Plugins**
    - (Not yet available in the community plugins list.)
