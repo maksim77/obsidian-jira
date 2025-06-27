@@ -35,7 +35,7 @@ export class JiraSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		new Setting(containerEl).setName("apiUrl").addText((text) =>
+		new Setting(containerEl).setName("API URL").addText((text) =>
 			text
 				.setValue(this.plugin.settings.apiUrl)
 				.onChange(async (value) => {
@@ -43,7 +43,7 @@ export class JiraSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				})
 		);
-		new Setting(containerEl).setName("username").addText((text) =>
+		new Setting(containerEl).setName("Username").addText((text) =>
 			text
 				.setValue(this.plugin.settings.username)
 				.onChange(async (value) => {
@@ -51,7 +51,7 @@ export class JiraSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				})
 		);
-		new Setting(containerEl).setName("password").addText((text) => {
+		new Setting(containerEl).setName("Password").addText((text) => {
 			text.setValue(this.plugin.settings.password).onChange(
 				async (value) => {
 					this.plugin.settings.password = value;
@@ -75,7 +75,7 @@ export class JiraSettingTab extends PluginSettingTab {
 
 			text.inputEl.parentElement?.appendChild(toggleBtn);
 		});
-		new Setting(containerEl).setName("path").addText((text) =>
+		new Setting(containerEl).setName("Jira notes path").addText((text) =>
 			text.setValue(this.plugin.settings.path).onChange(async (value) => {
 				this.plugin.settings.path = value;
 				await this.plugin.saveSettings();
@@ -94,7 +94,7 @@ export class JiraSettingTab extends PluginSettingTab {
 					})
 			);
 
-		new Setting(containerEl).setName("template").addTextArea((text) => {
+		new Setting(containerEl).setName("Template").addTextArea((text) => {
 			text.setValue(this.plugin.settings.template).onChange(
 				async (value) => {
 					this.plugin.settings.template = value;
@@ -132,7 +132,6 @@ export class JiraSettingTab extends PluginSettingTab {
 		});
 		details.appendChild(issuesList);
 
-		// Форма для добавления нового issue
 		const addDiv = document.createElement("div");
 		const input = document.createElement("input");
 		input.type = "text";
