@@ -78,7 +78,6 @@ export default class Jira extends Plugin {
 	}
 
 	private async UpdateIssue(issueKey: string) {
-		console.log(`Updating ${issueKey}`);
 		new Notice(`Updating ${issueKey}`);
 		const data = await this.jiraApi.fetchIssue(issueKey);
 		await this.saveIssueToFile(issueKey, data);
