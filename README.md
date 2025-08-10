@@ -48,14 +48,14 @@ A plugin for [Obsidian](https://obsidian.md/) that enables you to create Markdow
 The template is filled with data received from Jira.
 You can explore the available data fields by performing a `curl` request to your Jira API, for example:
 
-```sh
+```
 curl -u your-username:password https://jira.example.com/rest/api/2/issue/PROJ-123
 ```
 
 The template uses [Nunjucks](https://mozilla.github.io/nunjucks/) syntax.
 
 ### Example template
-```nunjucks
+```
 ---
 jira_assignee: "[[{{ fields.assignee.displayName }}]]"
 jira_reporter:  "[[{{ fields.reporter.displayName }}]]"
@@ -72,6 +72,12 @@ jira_components: [{% for comp in fields.components %}"{{ comp.name }}"{% if not 
 {{ fields.description }}
 
 ```
+
+### More templates
+See more template examples in `docs/templates/`:
+- `minimal.njk` – minimal frontmatter and title
+- `issue-full.njk` – extended fields and layout
+- `changelog.njk` – compact change-log oriented layout
 
 ## License
 MIT. See LICENSE for details.

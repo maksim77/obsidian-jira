@@ -1,0 +1,8 @@
+---
+jira_summary: {{ fields.summary }}
+jira_status: {{ fields.status.name }}
+jira_link: {{ browseUrl or (baseUrl + '/browse/' + key) }}
+---
+# [[{{ key }}]] {{ fields.summary }}
+
+{{ fields.description or '' }}

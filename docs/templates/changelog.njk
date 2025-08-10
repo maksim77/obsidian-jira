@@ -1,0 +1,21 @@
+---
+jira_key: {{ key }}
+jira_summary: {{ fields.summary }}
+jira_status: {{ fields.status.name }}
+jira_priority: {{ fields.priority.name }}
+jira_link: {{ browseUrl or (baseUrl + '/browse/' + key) }}
+---
+# [[{{ key }}]] {{ fields.summary }}
+
+- Status: {{ fields.status.name }}
+- Priority: {{ fields.priority.name }}
+- Assignee: {{ fields.assignee.displayName or '—' }}
+
+## Changelog
+{% if changelog and changelog.values and changelog.values.length %}
+{% for item in changelog.values %}
+- {{ item.created }} — {{ item.items | map(attribute='field') | join(', ') }}
+{% endfor %}
+{% else %}
+_No recent changes_
+{% endif %}

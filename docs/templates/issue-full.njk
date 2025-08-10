@@ -1,0 +1,33 @@
+---
+jira_key: {{ key }}
+jira_summary: {{ fields.summary }}
+jira_type: {{ fields.issuetype.name }}
+jira_status: {{ fields.status.name }}
+jira_priority: {{ fields.priority.name }}
+jira_project: {{ fields.project.key }}
+jira_assignee: "[[{{ fields.assignee.displayName }}]]"
+jira_reporter: "[[{{ fields.reporter.displayName }}]]"
+jira_fixVersions: [{% for v in fields.fixVersions %}"{{ v.name }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+jira_components: [{% for c in fields.components %}"{{ c.name }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+jira_labels: [{% for l in fields.labels %}"{{ l }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+jira_link: {{ browseUrl or (baseUrl + '/browse/' + key) }}
+---
+# [[{{ key }}]] {{ fields.summary }}
+
+> Status: **{{ fields.status.name }}** | Type: **{{ fields.issuetype.name }}** | Priority: **{{ fields.priority.name }}**
+
+## Description
+{{ fields.description or '—' }}
+
+## People
+- Assignee: {{ fields.assignee.displayName or '—' }}
+- Reporter: {{ fields.reporter.displayName or '—' }}
+
+## Project
+- Project: {{ fields.project.key }}
+- Components: {% if fields.components and fields.components.length %}{% for c in fields.components %}{{ c.name }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}—{% endif %}
+- Fix Versions: {% if fields.fixVersions and fields.fixVersions.length %}{% for v in fields.fixVersions %}{{ v.name }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}—{% endif %}
+- Labels: {% if fields.labels and fields.labels.length %}{{ fields.labels | join(', ') }}{% else %}—{% endif %}
+
+## Links
+- {{ browseUrl or (baseUrl + '/browse/' + key) }}
