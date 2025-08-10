@@ -1,0 +1,174 @@
+name: Project Health Check
+
+on:
+  schedule:
+    - cron: '0 11 * * 0'  # Every Sunday at 11 AM
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate health report
+        run: |
+          echo "Project health check started at $(date)" > health-report.txt
+          
+          # Overall health score
+          health_score=100
+          
+          echo "=== Project Health Score ===" >> health-report.txt
+          echo "Starting score: $health_score" >> health-report.txt
+
+      - name: Check build health
+        run: |
+          echo "" >> health-report.txt
+          echo "=== Build Health ===" >> health-report.txt
+          
+          # Test if build works
+          if npm run build; then
+            echo "✅ Build successful" >> health-report.txt
+          else
+            echo "❌ Build failed" >> health-report.txt
+            health_score=$((health_score - 20))
+          fi
+          
+          # Check for build artifacts
+          if [ -f "main.js" ] && [ -f "manifest.json" ] && [ -f "styles.css" ]; then
+            echo "✅ All build artifacts present" >> health-report.txt
+          else
+            echo "❌ Missing build artifacts" >> health-report.txt
+            health_score=$((health_score - 10))
+          fi
+
+      - name: Check code quality health
+        run: |
+          echo "" >> health-report.txt
+          echo "=== Code Quality Health ===" >> health-report.txt
+          
+          # Check linting
+          if npm run lint; then
+            echo "✅ Linting passed" >> health-report.txt
+          else
+            echo "❌ Linting failed" >> health-report.txt
+            health_score=$((health_score - 15))
+          fi
+          
+          # Check formatting
+          if npm run format:check; then
+            echo "✅ Formatting passed" >> health-report.txt
+          else
+            echo "❌ Formatting failed" >> health-report.txt
+            health_score=$((health_score - 5))
+          fi
+          
+          # Check type checking
+          if npm run type-check; then
+            echo "✅ Type checking passed" >> health-report.txt
+          else
+            echo "❌ Type checking failed" >> health-report.txt
+            health_score=$((health_score - 15))
+          fi
+
+      - name: Check documentation health
+        run: |
+          echo "" >> health-report.txt
+          echo "=== Documentation Health ===" >> health-report.txt
+          
+          # Check for essential documentation
+          if [ -f "README.md" ]; then
+            echo "✅ README.md present" >> health-report.txt
+          else
+            echo "❌ README.md missing" >> health-report.txt
+            health_score=$((health_score - 10))
+          fi
+          
+          if [ -f "docs/" ]; then
+            echo "✅ Documentation directory present" >> health-report.txt
+          else
+            echo "❌ Documentation directory missing" >> health-report.txt
+            health_score=$((health_score - 5))
+          fi
+          
+          if [ -f "CHANGELOG.md" ]; then
+            echo "✅ CHANGELOG.md present" >> health-report.txt
+          else
+            echo "❌ CHANGELOG.md missing" >> health-report.txt
+            health_score=$((health_score - 5))
+          fi
+
+      - name: Check security health
+        run: |
+          echo "" >> health-report.txt
+          echo "=== Security Health ===" >> health-report.txt
+          
+          # Check for security policy
+          if [ -f "SECURITY.md" ]; then
+            echo "✅ SECURITY.md present" >> health-report.txt
+          else
+            echo "❌ SECURITY.md missing" >> health-report.txt
+            health_score=$((health_score - 5))
+          fi
+          
+          # Check for vulnerabilities
+          if npm audit --audit-level=moderate; then
+            echo "✅ No moderate+ vulnerabilities" >> health-report.txt
+          else
+            echo "❌ Security vulnerabilities found" >> health-report.txt
+            health_score=$((health_score - 20))
+          fi
+
+      - name: Check community health
+        run: |
+          echo "" >> health-report.txt
+          echo "=== Community Health ===" >> health-report.txt
+          
+          # Check for contributing guidelines
+          if [ -f "CONTRIBUTING.md" ]; then
+            echo "✅ CONTRIBUTING.md present" >> health-report.txt
+          else
+            echo "❌ CONTRIBUTING.md missing" >> health-report.txt
+            health_score=$((health_score - 5))
+          fi
+          
+          # Check for code of conduct
+          if [ -f "CODE_OF_CONDUCT.md" ]; then
+            echo "✅ CODE_OF_CONDUCT.md present" >> health-report.txt
+          else
+            echo "❌ CODE_OF_CONDUCT.md missing" >> health-report.txt
+            health_score=$((health_score - 5))
+          fi
+
+      - name: Final health score
+        run: |
+          echo "" >> health-report.txt
+          echo "=== Final Health Score ===" >> health-report.txt
+          echo "Final score: $health_score/100" >> health-report.txt
+          
+          if [ $health_score -ge 90 ]; then
+            echo "Status: 🟢 Excellent" >> health-report.txt
+          elif [ $health_score -ge 80 ]; then
+            echo "Status: 🟡 Good" >> health-report.txt
+          elif [ $health_score -ge 70 ]; then
+            echo "Status: 🟠 Fair" >> health-report.txt
+          else
+            echo "Status: 🔴 Needs attention" >> health-report.txt
+          fi
+
+      - name: Upload health report
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-report
+          path: health-report.txt
+          retention-days: 7

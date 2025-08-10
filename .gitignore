@@ -1,24 +1,105 @@
-# vscode
-.vscode 
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Intellij
-*.iml
-.idea
-
-# npm
-node_modules
-
-# Don't include the compiled main.js file in the repo.
-# They should be uploaded to GitHub releases instead.
+# Build outputs
 main.js
-
-# Exclude sourcemaps
+manifest.json
+styles.css
 *.map
 
-# obsidian
+# IDE and editor files
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+.env.local
+.env.production
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Obsidian plugin data
 data.json
 
-# Exclude macOS Finder (System Explorer) View States
-.DS_Store
-.continue
-examples
+# Examples and test data
+examples/
+test-data/
+
+# Temporary files
+*.tmp
+*.temp

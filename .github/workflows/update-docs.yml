@@ -1,0 +1,45 @@
+name: Update Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'manifest.json'
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Update version in documentation
+        run: |
+          # Update version in README if needed
+          VERSION=$(node -p "require('./manifest.json').version")
+          echo "Current version: $VERSION"
+          
+          # Update version in documentation files
+          find docs/ -name "*.md" -exec sed -i "s/Version:.*/Version: $VERSION/g" {} \;
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs/
+          git diff --quiet && git diff --staged --quiet || git commit -m "docs: update version references"
+          git push

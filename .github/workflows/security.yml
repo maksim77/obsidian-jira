@@ -1,0 +1,64 @@
+name: Security Check
+
+on:
+  schedule:
+    - cron: '0 4 * * 0'  # Every Sunday at 4 AM
+  workflow_dispatch:
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+
+      - name: Check for known vulnerabilities
+        run: |
+          # Check for common security issues
+          if grep -r "password.*=.*['\"]" src/; then
+            echo "Found hardcoded passwords"
+            exit 1
+          fi
+          
+          if grep -r "api.*key.*=.*['\"]" src/; then
+            echo "Found hardcoded API keys"
+            exit 1
+          fi
+          
+          if grep -r "secret.*=.*['\"]" src/; then
+            echo "Found hardcoded secrets"
+            exit 1
+          fi
+
+      - name: Check file permissions
+        run: |
+          # Check for overly permissive files
+          find . -type f -perm /111 -name "*.js" -o -name "*.ts" | while read file; do
+            echo "Warning: Executable file found: $file"
+          done
+
+      - name: Generate security report
+        run: |
+          echo "Security check completed at $(date)" > security-report.txt
+          echo "Repository: ${{ github.repository }}" >> security-report.txt
+          echo "Branch: ${{ github.ref }}" >> security-report.txt
+          echo "Commit: ${{ github.sha }}" >> security-report.txt
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: security-report.txt
+          retention-days: 7

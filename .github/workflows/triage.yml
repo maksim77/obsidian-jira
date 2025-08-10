@@ -1,0 +1,59 @@
+name: Triage Issues and Pull Requests
+
+on:
+  issues:
+    types: [opened, edited, milestoned, demilestoned, assigned, unassigned, labeled, unlabeled, closed, reopened]
+  pull_request:
+    types: [opened, edited, milestoned, demilestoned, assigned, unassigned, labeled, unlabeled, closed, reopened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Triage Issues and Pull Requests
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { issue, pull_request } = context.payload;
+            const item = issue || pull_request;
+            
+            if (!item) return;
+            
+            // Add labels based on title and body content
+            const title = item.title.toLowerCase();
+            const body = (item.body || '').toLowerCase();
+            const content = title + ' ' + body;
+            
+            const labels = [];
+            
+            // Bug detection
+            if (content.includes('bug') || content.includes('error') || content.includes('fail') || content.includes('broken')) {
+              labels.push('bug');
+            }
+            
+            // Feature request detection
+            if (content.includes('feature') || content.includes('enhancement') || content.includes('improvement') || content.includes('add')) {
+              labels.push('enhancement');
+            }
+            
+            // Documentation detection
+            if (content.includes('doc') || content.includes('readme') || content.includes('guide') || content.includes('tutorial')) {
+              labels.push('documentation');
+            }
+            
+            // Help wanted detection
+            if (content.includes('help') || content.includes('question') || content.includes('how to')) {
+              labels.push('help wanted');
+            }
+            
+            // Add labels if not already present
+            for (const label of labels) {
+              if (!item.labels.some(l => l.name === label)) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: item.number,
+                  labels: [label]
+                });
+              }
+            }

@@ -1,0 +1,36 @@
+name: Backup Repository
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'  # Every Sunday at 2 AM
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create backup
+        run: |
+          # Create timestamp
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          
+          # Create backup archive
+          tar -czf backup_${TIMESTAMP}.tar.gz \
+            --exclude=node_modules \
+            --exclude=.git \
+            --exclude=*.log \
+            --exclude=*.tmp \
+            .
+          
+          echo "Backup created: backup_${TIMESTAMP}.tar.gz"
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-backup
+          path: backup_*.tar.gz
+          retention-days: 30

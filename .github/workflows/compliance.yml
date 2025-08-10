@@ -1,0 +1,100 @@
+name: Compliance Check
+
+on:
+  schedule:
+    - cron: '0 7 * * 0'  # Every Sunday at 7 AM
+  workflow_dispatch:
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check license compliance
+        run: |
+          echo "Compliance check started at $(date)" > compliance-report.txt
+          
+          # Check for license file
+          if [ -f "LICENSE" ]; then
+            echo "LICENSE file found - good" >> compliance-report.txt
+          else
+            echo "LICENSE file missing - compliance issue" >> compliance-report.txt
+          fi
+          
+          # Check for security policy
+          if [ -f "SECURITY.md" ]; then
+            echo "SECURITY.md file found - good" >> compliance-report.txt
+          else
+            echo "SECURITY.md file missing - compliance issue" >> compliance-report.txt
+          fi
+          
+          # Check for code of conduct
+          if [ -f "CODE_OF_CONDUCT.md" ]; then
+            echo "CODE_OF_CONDUCT.md file found - good" >> compliance-report.txt
+          else
+            echo "CODE_OF_CONDUCT.md file missing - compliance issue" >> compliance-report.txt
+          fi
+
+      - name: Check documentation compliance
+        run: |
+          # Check for README
+          if [ -f "README.md" ]; then
+            echo "README.md file found - good" >> compliance-report.txt
+          else
+            echo "README.md file missing - compliance issue" >> compliance-report.txt
+          fi
+          
+          # Check for contributing guidelines
+          if [ -f "CONTRIBUTING.md" ]; then
+            echo "CONTRIBUTING.md file found - good" >> compliance-report.txt
+          else
+            echo "CONTRIBUTING.md file missing - compliance issue" >> compliance-report.txt
+          fi
+          
+          # Check for changelog
+          if [ -f "CHANGELOG.md" ]; then
+            echo "CHANGELOG.md file found - good" >> compliance-report.txt
+          else
+            echo "CHANGELOG.md file missing - compliance issue" >> compliance-report.txt
+          fi
+
+      - name: Check code quality compliance
+        run: |
+          # Check for ESLint config
+          if [ -f ".eslintrc" ]; then
+            echo "ESLint config found - good" >> compliance-report.txt
+          else
+            echo "ESLint config missing - compliance issue" >> compliance-report.txt
+          fi
+          
+          # Check for Prettier config
+          if [ -f ".prettierrc" ]; then
+            echo "Prettier config found - good" >> compliance-report.txt
+          else
+            echo "Prettier config missing - compliance issue" >> compliance-report.txt
+          fi
+          
+          # Check for TypeScript config
+          if [ -f "tsconfig.json" ]; then
+            echo "TypeScript config found - good" >> compliance-report.txt
+          else
+            echo "TypeScript config missing - compliance issue" >> compliance-report.txt
+          fi
+
+      - name: Upload compliance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report
+          path: compliance-report.txt
+          retention-days: 7

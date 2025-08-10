@@ -7,3 +7,7 @@ coverage/
 manifest.json
 styles.css
 data.json
+package-lock.json
+yarn.lock
+*.min.js
+*.min.css

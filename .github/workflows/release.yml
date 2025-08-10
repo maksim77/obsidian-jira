@@ -1,34 +1,101 @@
-name: Release Obsidian plugin
+name: Release
 
 on:
   push:
     tags:
-      - "*"
+      - 'v*'
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18.x"
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
 
-      - name: Build plugin
-        run: |
-          npm install
-          npm run build
+    - name: Install dependencies
+      run: npm ci
 
-      - name: Create release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          tag="${GITHUB_REF#refs/tags/}"
+    - name: Build
+      run: npm run build
 
-          gh release create "$tag" \
-            --title="$tag" \
-            main.js manifest.json styles.css
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          ## What's Changed
+          
+          This release includes the following changes:
+          
+          - Bug fixes and improvements
+          - Enhanced documentation
+          - Template improvements
+          
+          ## Installation
+          
+          1. Download the release files
+          2. Extract to your Obsidian plugins folder
+          3. Enable the plugin in Obsidian settings
+          
+          ## Documentation
+          
+          See the [documentation](https://github.com/maksim77/obsidian-jira/tree/main/docs) for detailed guides.
+          
+          ## Support
+          
+          If you encounter any issues, please [create an issue](https://github.com/maksim77/obsidian-jira/issues) or join the [discussions](https://github.com/maksim77/obsidian-jira/discussions).
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./main.js
+        asset_name: main.js
+        asset_content_type: application/javascript
+
+    - name: Upload Manifest
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./manifest.json
+        asset_name: manifest.json
+        asset_content_type: application/json
+
+    - name: Upload Styles
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./styles.css
+        asset_name: styles.css
+        asset_content_type: text/css
+
+    - name: Create ZIP Archive
+      run: |
+        zip -r obsidian-jira-${{ github.ref_name }}.zip main.js manifest.json styles.css
+
+    - name: Upload ZIP Archive
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./obsidian-jira-${{ github.ref_name }}.zip
+        asset_name: obsidian-jira-${{ github.ref_name }}.zip
+        asset_content_type: application/zip

@@ -11,7 +11,11 @@
     "importHelpers": true,
     "isolatedModules": true,
     "strictNullChecks": true,
-	"allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
     "lib": [
       "DOM",
       "ES5",
@@ -20,6 +24,13 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "main.js",
+    "manifest.json",
+    "styles.css"
   ]
 }

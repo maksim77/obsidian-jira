@@ -1,0 +1,82 @@
+name: Code Quality Check
+
+on:
+  schedule:
+    - cron: '0 8 * * 0'  # Every Sunday at 8 AM
+  workflow_dispatch:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run formatting check
+        run: npm run format:check
+
+      - name: Run type checking
+        run: npm run type-check
+
+      - name: Check code complexity
+        run: |
+          echo "Code quality check started at $(date)" > quality-report.txt
+          
+          # Count lines of code
+          loc=$(find src/ -name "*.ts" -exec wc -l {} + | tail -1 | awk '{print $1}')
+          echo "Lines of code: $loc" >> quality-report.txt
+          
+          # Count functions
+          functions=$(grep -r "function\|=>" src/ | wc -l)
+          echo "Number of functions: $functions" >> quality-report.txt
+          
+          # Check for long functions (more than 50 lines)
+          long_functions=$(find src/ -name "*.ts" -exec awk '/^[[:space:]]*[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]*\([^)]*\)[[:space:]]*\{/ {in_func=1; func_start=NR} /^[[:space:]]*\}/ {if(in_func && NR-func_start > 50) print FILENAME ":" func_start; in_func=0}' {} \; | wc -l)
+          echo "Long functions (>50 lines): $long_functions" >> quality-report.txt
+
+      - name: Check for code smells
+        run: |
+          # Check for magic numbers
+          magic_numbers=$(grep -r "[0-9]\{2,\}" src/ | grep -v "//" | wc -l)
+          echo "Potential magic numbers: $magic_numbers" >> quality-report.txt
+          
+          # Check for TODO comments
+          todos=$(grep -r "TODO" src/ | wc -l)
+          echo "TODO comments: $todos" >> quality-report.txt
+          
+          # Check for FIXME comments
+          fixmes=$(grep -r "FIXME" src/ | wc -l)
+          echo "FIXME comments: $fixmes" >> quality-report.txt
+          
+          # Check for console.log statements
+          console_logs=$(grep -r "console.log" src/ | wc -l)
+          echo "console.log statements: $console_logs" >> quality-report.txt
+
+      - name: Check documentation coverage
+        run: |
+          # Count documented functions
+          documented_functions=$(grep -r "/\*\*" src/ | wc -l)
+          echo "Documented functions: $documented_functions" >> quality-report.txt
+          
+          # Check for missing JSDoc
+          functions_without_docs=$(grep -r "function\|=>" src/ | grep -v "/\*\*" | wc -l)
+          echo "Functions without documentation: $functions_without_docs" >> quality-report.txt
+
+      - name: Upload quality report
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-report
+          path: quality-report.txt
+          retention-days: 7

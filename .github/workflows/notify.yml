@@ -1,0 +1,41 @@
+name: Notify on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Discord
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { release } = context.payload;
+            
+            // You can add Discord webhook notification here
+            // const webhookUrl = process.env.DISCORD_WEBHOOK;
+            // if (webhookUrl) {
+            //   await fetch(webhookUrl, {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //       content: `🎉 New release: ${release.name} (${release.tag_name})`
+            //     })
+            //   });
+            // }
+            
+            console.log(`Release ${release.tag_name} published!`);
+
+      - name: Notify Twitter
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { release } = context.payload;
+            
+            // You can add Twitter notification here
+            // const tweet = `🎉 New release: ${release.name} (${release.tag_name}) - ${release.html_url}`;
+            // console.log(`Would tweet: ${tweet}`);
+            
+            console.log(`Release ${release.tag_name} published!`);

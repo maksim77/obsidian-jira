@@ -1,0 +1,65 @@
+name: Performance Check
+
+on:
+  schedule:
+    - cron: '0 5 * * 0'  # Every Sunday at 5 AM
+  workflow_dispatch:
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and measure
+        run: |
+          echo "Starting build..."
+          start_time=$(date +%s)
+          
+          npm run build
+          
+          end_time=$(date +%s)
+          build_time=$((end_time - start_time))
+          
+          echo "Build completed in ${build_time} seconds"
+          echo "Build time: ${build_time}s" > performance-report.txt
+
+      - name: Check bundle size
+        run: |
+          if [ -f "main.js" ]; then
+            size=$(wc -c < main.js)
+            echo "Bundle size: ${size} bytes" >> performance-report.txt
+            echo "Bundle size: ${size} bytes"
+          fi
+
+      - name: Check for performance issues
+        run: |
+          # Check for common performance issues
+          if grep -r "setTimeout.*0" src/; then
+            echo "Found setTimeout(0) - consider using requestAnimationFrame" >> performance-report.txt
+          fi
+          
+          if grep -r "setInterval" src/; then
+            echo "Found setInterval - consider cleanup" >> performance-report.txt
+          fi
+          
+          if grep -r "innerHTML" src/; then
+            echo "Found innerHTML - consider textContent for security" >> performance-report.txt
+          fi
+
+      - name: Upload performance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report
+          path: performance-report.txt
+          retention-days: 7

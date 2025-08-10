@@ -1,7 +1,10 @@
 {
     "root": true,
     "parser": "@typescript-eslint/parser",
-    "env": { "node": true },
+    "env": { 
+        "node": true,
+        "es6": true
+    },
     "plugins": [
       "@typescript-eslint"
     ],
@@ -11,7 +14,8 @@
       "plugin:@typescript-eslint/recommended"
     ], 
     "parserOptions": {
-        "sourceType": "module"
+        "sourceType": "module",
+        "ecmaVersion": 2020
     },
     "rules": {
       "no-unused-vars": "off",
@@ -19,6 +23,17 @@
       "@typescript-eslint/ban-ts-comment": "off",
       "no-prototype-builtins": "off",
       "@typescript-eslint/no-empty-function": "off",
-	  "@typescript-eslint/no-explicit-any": "off"
-    } 
-  }
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/prefer-const": "error",
+      "@typescript-eslint/no-var-requires": "error",
+      "prefer-const": "error",
+      "no-var": "error"
+    },
+    "ignorePatterns": [
+        "main.js",
+        "manifest.json",
+        "styles.css",
+        "node_modules/",
+        "dist/"
+    ]
+}

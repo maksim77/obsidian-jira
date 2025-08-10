@@ -1,0 +1,88 @@
+name: Analytics
+
+on:
+  schedule:
+    - cron: '0 10 * * 0'  # Every Sunday at 10 AM
+  workflow_dispatch:
+
+jobs:
+  analytics:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate analytics report
+        run: |
+          echo "Analytics report generated at $(date)" > analytics-report.txt
+          
+          # Repository statistics
+          echo "=== Repository Statistics ===" >> analytics-report.txt
+          echo "Total files: $(find . -type f | wc -l)" >> analytics-report.txt
+          echo "Total directories: $(find . -type d | wc -l)" >> analytics-report.txt
+          echo "Total lines: $(find . -name "*.ts" -o -name "*.js" -o -name "*.md" -o -name "*.json" | xargs wc -l | tail -1 | awk '{print $1}')" >> analytics-report.txt
+          
+          # Code statistics
+          echo "" >> analytics-report.txt
+          echo "=== Code Statistics ===" >> analytics-report.txt
+          echo "TypeScript files: $(find src/ -name "*.ts" | wc -l)" >> analytics-report.txt
+          echo "JavaScript files: $(find . -name "*.js" | wc -l)" >> analytics-report.txt
+          echo "Markdown files: $(find . -name "*.md" | wc -l)" >> analytics-report.txt
+          echo "JSON files: $(find . -name "*.json" | wc -l)" >> analytics-report.txt
+          
+          # Documentation statistics
+          echo "" >> analytics-report.txt
+          echo "=== Documentation Statistics ===" >> analytics-report.txt
+          echo "Documentation files: $(find docs/ -name "*.md" | wc -l)" >> analytics-report.txt
+          echo "Documentation lines: $(find docs/ -name "*.md" | xargs wc -l | tail -1 | awk '{print $1}')" >> analytics-report.txt
+          
+          # Build statistics
+          echo "" >> analytics-report.txt
+          echo "=== Build Statistics ===" >> analytics-report.txt
+          if [ -f "main.js" ]; then
+            echo "Main bundle size: $(wc -c < main.js) bytes" >> analytics-report.txt
+          fi
+          if [ -f "manifest.json" ]; then
+            echo "Manifest size: $(wc -c < manifest.json) bytes" >> analytics-report.txt
+          fi
+          if [ -f "styles.css" ]; then
+            echo "Styles size: $(wc -c < styles.css) bytes" >> analytics-report.txt
+          fi
+
+      - name: Check for trends
+        run: |
+          echo "" >> analytics-report.txt
+          echo "=== Trends ===" >> analytics-report.txt
+          
+          # Check for recent activity
+          recent_commits=$(git log --since="1 week ago" --oneline | wc -l)
+          echo "Commits in last week: $recent_commits" >> analytics-report.txt
+          
+          recent_files=$(git log --since="1 week ago" --name-only --pretty=format: | sort | uniq | wc -l)
+          echo "Files modified in last week: $recent_files" >> analytics-report.txt
+          
+          # Check for file growth
+          echo "" >> analytics-report.txt
+          echo "=== File Growth ===" >> analytics-report.txt
+          for file in src/*.ts; do
+            if [ -f "$file" ]; then
+              lines=$(wc -l < "$file")
+              echo "$file: $lines lines" >> analytics-report.txt
+            fi
+          done
+
+      - name: Upload analytics report
+        uses: actions/upload-artifact@v4
+        with:
+          name: analytics-report
+          path: analytics-report.txt
+          retention-days: 30

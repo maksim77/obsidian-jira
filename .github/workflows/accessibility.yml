@@ -1,0 +1,70 @@
+name: Accessibility Check
+
+on:
+  schedule:
+    - cron: '0 6 * * 0'  # Every Sunday at 6 AM
+  workflow_dispatch:
+
+jobs:
+  accessibility:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for accessibility issues
+        run: |
+          echo "Accessibility check started at $(date)" > accessibility-report.txt
+          
+          # Check for common accessibility issues
+          if grep -r "onclick" src/; then
+            echo "Found onclick handlers - consider keyboard accessibility" >> accessibility-report.txt
+          fi
+          
+          if grep -r "tabindex.*-1" src/; then
+            echo "Found negative tabindex - review keyboard navigation" >> accessibility-report.txt
+          fi
+          
+          if grep -r "aria-label" src/; then
+            echo "Found aria-label usage - good for accessibility" >> accessibility-report.txt
+          fi
+          
+          if grep -r "role=" src/; then
+            echo "Found ARIA roles - good for accessibility" >> accessibility-report.txt
+          fi
+          
+          # Check for color contrast issues (basic check)
+          if grep -r "#[0-9a-fA-F]{3,6}" src/; then
+            echo "Found color codes - verify contrast ratios" >> accessibility-report.txt
+          fi
+
+      - name: Check for semantic HTML
+        run: |
+          # Check for semantic HTML elements
+          if grep -r "<button" src/; then
+            echo "Found button elements - good for accessibility" >> accessibility-report.txt
+          fi
+          
+          if grep -r "<input" src/; then
+            echo "Found input elements - check for proper labels" >> accessibility-report.txt
+          fi
+          
+          if grep -r "<label" src/; then
+            echo "Found label elements - good for accessibility" >> accessibility-report.txt
+          fi
+
+      - name: Upload accessibility report
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-report
+          path: accessibility-report.txt
+          retention-days: 7
