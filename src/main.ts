@@ -72,7 +72,7 @@ export default class Jira extends Plugin {
 	}
 
 	private async saveIssueToFile(issueKey: string, data: any) {
-		const filePath = `${this.settings.path}/${issueKey}.md`;
+		const filePath = renderString(`${this.settings.path}/${issueKey}.md`, data);
 		const content = renderString(this.settings.template, data);
 		await this.app.vault.adapter.write(filePath, content);
 	}
