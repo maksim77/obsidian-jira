@@ -50,7 +50,7 @@ export default class Jira extends Plugin {
 			this.app.workspace.on("active-leaf-change", () => {
 				const file = this.app.workspace.getActiveFile();
 
-				if (file && this.settings.issues.includes(file.basename)) {
+				if (file && this.settings.issues.some(issue => issue.key === file.basename)) {
 					this.statusBarItemEl.show();
 					this.statusBarItemEl.setText(`Update: ${file.basename}`);
 				} else {
@@ -72,9 +72,33 @@ export default class Jira extends Plugin {
 	}
 
 	private async saveIssueToFile(issueKey: string, data: any) {
-		const filePath = renderString(`${this.settings.path}/${issueKey}.md`, data);
+		const newFilePath = renderString(`${this.settings.path}/${issueKey}.md`, data);
 		const content = renderString(this.settings.template, data);
-		await this.app.vault.adapter.write(filePath, content);
+		
+		// Найти существующий файл для этого issue
+		const existingIssue = this.settings.issues.find(issue => issue.key === issueKey);
+		const oldFilePath = existingIssue?.path;
+		
+		// Удалить старый файл, если он существует и отличается от нового
+		if (oldFilePath && oldFilePath !== newFilePath) {
+			try {
+				await this.app.vault.adapter.remove(oldFilePath);
+				new Notice(`Moved ${issueKey} from ${oldFilePath} to ${newFilePath}`);
+			} catch (error) {
+				console.warn(`Could not remove old file ${oldFilePath}:`, error);
+			}
+		}
+		
+		// Создать новый файл
+		await this.app.vault.adapter.write(newFilePath, content);
+		
+		// Обновить путь в настройках
+		if (existingIssue) {
+			existingIssue.path = newFilePath;
+		} else {
+			this.settings.issues.push({ key: issueKey, path: newFilePath });
+		}
+		await this.saveSettings();
 	}
 
 	private async UpdateIssue(issueKey: string) {
@@ -86,7 +110,7 @@ export default class Jira extends Plugin {
 
 	private async UpdateCallback() {
 		const file = this.app.workspace.getActiveFile();
-		if (file && this.settings.issues.includes(file.basename)) {
+		if (file && this.settings.issues.some(issue => issue.key === file.basename)) {
 			const data = await this.jiraApi.fetchIssue(file.basename);
 
 			await this.saveIssueToFile(file.basename, data);
@@ -99,7 +123,7 @@ export default class Jira extends Plugin {
 
 	private async UpdateAllCallback() {
 		for (const issue of this.settings.issues) {
-			this.UpdateIssue(issue);
+			this.UpdateIssue(issue.key);
 		}
 	}
 
@@ -110,9 +134,8 @@ export default class Jira extends Plugin {
 		await this.saveIssueToFile(issueKey, data);
 
 		editor.replaceSelection(`[[${issueKey}]]`);
-		if (!this.settings.issues.includes(issueKey)) {
-			this.settings.issues.push(issueKey);
-			this.saveSettings();
+		if (!this.settings.issues.some(issue => issue.key === issueKey)) {
+			// Путь будет добавлен в saveIssueToFile
 		}
 
 		new Notice(`Note ${issueKey} created`);
@@ -126,6 +149,13 @@ export default class Jira extends Plugin {
 			DEFAULT_SETTINGS,
 			await this.loadData()
 		);
+		
+		// Миграция старых данных issues из string[] в объекты
+		if (this.settings.issues.length > 0 && typeof this.settings.issues[0] === 'string') {
+			const oldIssues = this.settings.issues as unknown as string[];
+			this.settings.issues = oldIssues.map(key => ({ key, path: "" }));
+			await this.saveSettings();
+		}
 	}
 
 	async saveSettings() {

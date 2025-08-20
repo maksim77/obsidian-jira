@@ -1,6 +1,7 @@
 import { App, PluginSettingTab, Setting, setIcon } from "obsidian";
 
 import Jira from "./main";
+import { Notice } from "obsidian";
 
 export interface JiraSettings {
 	apiUrl: string;
@@ -8,7 +9,7 @@ export interface JiraSettings {
 	password: string;
 	path: string;
 	template: string;
-	issues: string[];
+	issues: { key: string; path: string }[];
 	ignoreTLS: boolean;
 }
 
@@ -113,7 +114,7 @@ export class JiraSettingTab extends PluginSettingTab {
 		const issuesList = document.createElement("ul");
 		this.plugin.settings.issues.forEach((issue, idx) => {
 			const li = document.createElement("li");
-			li.textContent = issue;
+			li.textContent = issue.key;
 
 			const removeBtn = document.createElement("button");
 			removeBtn.type = "button";
@@ -135,17 +136,24 @@ export class JiraSettingTab extends PluginSettingTab {
 		const addDiv = document.createElement("div");
 		const input = document.createElement("input");
 		input.type = "text";
-		input.placeholder = "Add issue...";
+		input.placeholder = "Add issue (e.g., JRA-123)";
 		addDiv.appendChild(input);
 
 		const addBtn = document.createElement("button");
 		addBtn.textContent = "Add";
 		addBtn.onclick = async () => {
 			const value = input.value.trim();
-			if (value && !this.plugin.settings.issues.includes(value)) {
-				this.plugin.settings.issues.push(value);
-				await this.plugin.saveSettings();
-				this.display();
+			if (value) {
+				const existingIssue = this.plugin.settings.issues.find(
+					(issue) => issue.key === value
+				);
+				if (!existingIssue) {
+					this.plugin.settings.issues.push({ key: value, path: "" });
+					await this.plugin.saveSettings();
+					this.display();
+				} else {
+					new Notice("Issue already added - this issue key is already in the list.");
+				}
 			}
 			input.value = "";
 		};
